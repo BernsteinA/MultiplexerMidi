@@ -197,7 +197,7 @@ void loop(void)
   // send note on and note off immediately, but only send aftertouch every so often so as not to get the buffer backed up
   if ((millis() - lastDebounceTime) > debounceDelay) {
     sendAfterTouch();
-    sendAveragePressure();
+  //  sendAveragePressure();
     lastDebounceTime = millis();
   }
 
