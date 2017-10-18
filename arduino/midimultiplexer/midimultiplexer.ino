@@ -182,15 +182,12 @@ void loop(void)
   {
     wasOn = midiVelocities[i] > 0; //todo: array of booleans
     setPin(i);
+    delayMicroseconds(50); 
     muxValues[i] = analogRead(fsrAnalogPin);
     midiVelocities[i] = map(muxValues[i], 0, 1023, 0, 127); // TODO: pressure sensitivity curve
     
     newOn = midiVelocities[i] > 0; //todo: threshold
     if(!wasOn && newOn) { // note on
-        while(analogRead(fsrAnalogPin) != muxValues[i]) {
-            muxValues[i] = analogRead(fsrAnalogPin);
-        }
-        midiVelocities[i] = map(muxValues[i], 0, 1023, 0, 127);
         midi.send(0x90, base_note+i, midiVelocities[i]);
     }
     else if (wasOn && midiVelocities[i]==0) { // note off
