@@ -13,6 +13,8 @@
 #define FACTORYRESET_ENABLE         1
 #define MINIMUM_FIRMWARE_VERSION    "0.7.0"
 
+#define AFTERTOUCH_THRESHOLD 64
+
 /* ...hardware SPI, using SCK/MOSI/MISO hardware SPI pins and then user selected CS/IRQ/RST */
 Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
 
@@ -34,9 +36,13 @@ unsigned long debounceDelay = 50;
 
 void sendAfterTouch() {
     for (byte i = 0; i < 16; i++) {
-        if(midiVelocities[i]>0) {
-            midi.send(0xA0, base_note+i, midiVelocities[i]); // poly pressure
-//            midi.send(0xD0+i, midiVelocities[i]); // channel pressure
+        if(midiVelocities[i] > AFTERTOUCH_THRESHOLD) {
+
+        int aftertouchvalue = map(midiVelocities[i], AFTERTOUCH_THRESHOLD, 127, 0, 127);
+        aftertouchvalue = constrain(aftertouchvalue, 0, 127);
+          
+            midi.send(0xA0, base_note+i, aftertouchvalue); // poly pressure
+//            midi.send(0xD0+i, aftertouchvalue); // channel pressure
         }
     }
 }
