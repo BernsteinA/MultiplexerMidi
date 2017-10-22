@@ -55,6 +55,7 @@ void sendAveragePressure() {
     }
 
    int averageValue = map((sumValue / countValues), 0, 1023, 0, MAX_SENSOR_VALUE);
+   averageValue = constrain(averageValue, 0, MAX_SENSOR_VALUE);
 
   if(countValues > 0) {
      midi.send(0xB0, 0x01, averageValue >> 3); // 10 bit analog input to 7 bit coarse value
@@ -189,6 +190,7 @@ void loop(void)
     delayMicroseconds(50); 
     muxValues[i] = analogRead(fsrAnalogPin);
     midiVelocities[i] = map(muxValues[i], 0, MAX_SENSOR_VALUE, 0, 127); // TODO: pressure sensitivity curve
+    midiVelocities[i] = constrain(midiVelocities[i], 0, 127);
     
     newOn = midiVelocities[i] > 0; //todo: threshold
     if(!wasOn && newOn) { // note on
