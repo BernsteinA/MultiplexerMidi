@@ -13,6 +13,8 @@
 #define FACTORYRESET_ENABLE         1
 #define MINIMUM_FIRMWARE_VERSION    "0.7.0"
 
+#define MAX_SENSOR_VALUE 850
+
 /* ...hardware SPI, using SCK/MOSI/MISO hardware SPI pins and then user selected CS/IRQ/RST */
 Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
 
@@ -52,9 +54,11 @@ void sendAveragePressure() {
         }
     }
 
+   int averageValue = map((sumValue / countValues), 0, 1023, 0, MAX_SENSOR_VALUE);
+
   if(countValues > 0) {
-     midi.send(0xB0, 0x01, (sumValue / countValues) >> 3); // 10 bit analog input to 7 bit coarse value
-     midi.send(0xB0, 0x21, ((sumValue / countValues) << 4) % 128); // 10 bit analog input to 7 bit finevalue
+     midi.send(0xB0, 0x01, averageValue >> 3); // 10 bit analog input to 7 bit coarse value
+     midi.send(0xB0, 0x21, (averageValue << 4) % 128); // 10 bit analog input to 7 bit finevalue
   }
   else {
 //    midi.send(0xB0, 0x01, 0);
@@ -184,7 +188,7 @@ void loop(void)
     setPin(i);
     delayMicroseconds(50); 
     muxValues[i] = analogRead(fsrAnalogPin);
-    midiVelocities[i] = map(muxValues[i], 0, 1023, 0, 127); // TODO: pressure sensitivity curve
+    midiVelocities[i] = map(muxValues[i], 0, MAX_SENSOR_VALUE, 0, 127); // TODO: pressure sensitivity curve
     
     newOn = midiVelocities[i] > 0; //todo: threshold
     if(!wasOn && newOn) { // note on
