@@ -56,7 +56,7 @@ void loop(void)
 {
     wasOn = isOn;
     setPin(WHICH_SENSOR);
-    delayMicroseconds(50); 
+    delayMicroseconds(50);
     currentPressure = analogRead(fsrAnalogPin);
     
     newOn = currentPressure >= MIN_SENSOR_VALUE;
@@ -65,7 +65,17 @@ void loop(void)
         currentAftertouch = getAfterTouch(currentPressure, noteOnPressure);
     }
     else if(!wasOn && newOn) {
-        noteOnPressure = currentPressure;
+
+        int lastPressure = currentPressure;
+        currentPressure = analogRead(fsrAnalogPin);
+
+        // loop until pressure goes back down, aka rudimentary peak detection
+        while(currentPressure >= lastPressure) {
+            lastPressure = currentPressure;
+            currentPressure = analogRead(fsrAnalogPin);
+        }
+
+        noteOnPressure = lastPressure;
         currentVelocity = getVelocity(noteOnPressure);
     }
     else if (wasOn && !newOn) {
